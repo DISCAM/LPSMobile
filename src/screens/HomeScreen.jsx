@@ -4,7 +4,10 @@ import { useAuth } from "../auth/useAuth";
 
 export const HomeScreen = ({
   onOpenWarehouseReceipt,
+  onOpenWarehouseShipment,
   onOpenLogisticUnitLookup,
+  onOpenProductLookup,
+  onOpenProductionLotLookup,
 }) => {
   const { user, logout } = useAuth();
 
@@ -26,8 +29,22 @@ export const HomeScreen = ({
           <Text style={styles.operationButtonText}>Przyjęcie z produkcji</Text>
         </Pressable>
 
-        <Pressable style={styles.operationButton}>
+        <Pressable
+          style={styles.operationButton}
+          onPress={onOpenWarehouseShipment}
+        >
           <Text style={styles.operationButtonText}>Wydanie z magazynu</Text>
+        </Pressable>
+
+        <Pressable style={styles.operationButton} onPress={onOpenProductLookup}>
+          <Text style={styles.operationButtonText}>Sprawdź EAN</Text>
+        </Pressable>
+
+        <Pressable
+          style={styles.operationButton}
+          onPress={onOpenProductionLotLookup}
+        >
+          <Text style={styles.operationButtonText}>Sprawdź LOT</Text>
         </Pressable>
 
         <Pressable
