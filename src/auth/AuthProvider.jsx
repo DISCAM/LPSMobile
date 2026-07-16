@@ -14,7 +14,7 @@ export const AuthProvider = ({ children }) => {
     const restoreSession = async () => {
       try {
         const savedToken = await SecureStore.getItemAsync(TOKEN_KEY);
-
+        // gdy nic nie ma pod kluczem, wychodzę o
         if (!savedToken) {
           return;
         }

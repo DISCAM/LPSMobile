@@ -17,6 +17,7 @@ import {
   getWarehouseOrdersRequest,
   shipLogisticUnitRequest,
 } from "../api/warehouseShipmentApi";
+
 import { SelectionModal } from "../components/SelectionModal";
 
 const normalizeValue = (value) => {
@@ -35,40 +36,6 @@ const normalizeSscc = (value) => {
   }
 
   return digits;
-};
-
-const getWarehouseOrderId = (warehouseOrder) => {
-  return warehouseOrder?.warehouseOrderId ?? warehouseOrder?.WarehouseOrderId;
-};
-
-const getWarehouseOrderStatus = (warehouseOrder) => {
-  return (
-    warehouseOrder?.status ??
-    warehouseOrder?.warehouseOrderStatus ??
-    warehouseOrder?.Status ??
-    warehouseOrder?.WarehouseOrderStatus ??
-    "Brak"
-  );
-};
-
-const getWarehouseOrderNumber = (warehouseOrder) => {
-  return (
-    warehouseOrder?.orderNumber ??
-    warehouseOrder?.OrderNumber ??
-    `ID: ${getWarehouseOrderId(warehouseOrder)}`
-  );
-};
-
-const getWarehouseOrderCustomerName = (warehouseOrder) => {
-  return (
-    warehouseOrder?.customerName ??
-    warehouseOrder?.CustomerName ??
-    "Brak klienta"
-  );
-};
-
-const getLogisticUnitId = (logisticUnit) => {
-  return logisticUnit?.logisticUnitId ?? logisticUnit?.LogisticUnitId;
 };
 
 export const WarehouseShipmentScreen = ({ onBack }) => {
@@ -107,25 +74,25 @@ export const WarehouseShipmentScreen = ({ onBack }) => {
   };
 
   const filterAvailableWarehouseOrders = (warehouseOrdersData) => {
-    return warehouseOrdersData.filter((warehouseOrder) => {
-      const status = normalizeValue(getWarehouseOrderStatus(warehouseOrder));
-
-      return !["COMPLETED", "CANCELLED"].includes(status);
-    });
+    return warehouseOrdersData.filter(
+      (warehouseOrder) =>
+        !["COMPLETED", "CANCELLED"].includes(
+          normalizeValue(warehouseOrder.status),
+        ),
+    );
   };
 
   const loadWarehouseOrders = async () => {
     const warehouseOrdersData = await getWarehouseOrdersRequest(token);
-
     const availableWarehouseOrders =
       filterAvailableWarehouseOrders(warehouseOrdersData);
-
     setWarehouseOrders(availableWarehouseOrders);
   };
 
+  //ladowanie danych plus stan ekranu
+
   useEffect(() => {
     let isCancelled = false;
-
     const loadInitialData = async () => {
       try {
         setError("");
@@ -136,10 +103,8 @@ export const WarehouseShipmentScreen = ({ onBack }) => {
         if (isCancelled) {
           return;
         }
-
         const availableWarehouseOrders =
           filterAvailableWarehouseOrders(warehouseOrdersData);
-
         setWarehouseOrders(availableWarehouseOrders);
       } catch (requestError) {
         if (!isCancelled) {
@@ -161,17 +126,22 @@ export const WarehouseShipmentScreen = ({ onBack }) => {
     };
   }, [token]);
 
+  //otwarcie modalu
   const handleOpenWarehouseOrderModal = () => {
     if (warehouseOrders.length === 0) {
       return;
     }
-
     setIsWarehouseOrderModalVisible(true);
   };
 
+  //zamokniecie modalu
   const handleCloseWarehouseOrderModal = () => {
     setIsWarehouseOrderModalVisible(false);
   };
+
+  //zapisanie wybranego zlecenia
+  //czyszczenie stanu
+  // zamkniecie modalu
 
   const handleWarehouseOrderSelect = (warehouseOrder) => {
     setSelectedWarehouseOrder(warehouseOrder);
@@ -185,12 +155,10 @@ export const WarehouseShipmentScreen = ({ onBack }) => {
     focusSsccInput();
   };
 
+  //skanowanie kodu, pobieranie jednostek
+
   const handleSearch = async (scannedValue = sscc, showEmptyError = true) => {
     const normalizedSscc = normalizeSscc(scannedValue);
-
-    //console.log("RAW SSCC:", JSON.stringify(scannedValue));
-
-    //console.log("NORMALIZED SSCC:", normalizedSscc);
 
     if (!selectedWarehouseOrder) {
       setError("Najpierw wybierz zlecenie magazynowe.");
@@ -273,7 +241,6 @@ export const WarehouseShipmentScreen = ({ onBack }) => {
 
   const handleScanSubmit = (event) => {
     const scannedValue = event.nativeEvent.text;
-
     handleSearch(scannedValue, false);
   };
 
@@ -306,9 +273,9 @@ export const WarehouseShipmentScreen = ({ onBack }) => {
       return;
     }
 
-    const warehouseOrderId = getWarehouseOrderId(selectedWarehouseOrder);
+    const warehouseOrderId = selectedWarehouseOrder.warehouseOrderId;
 
-    const logisticUnitId = getLogisticUnitId(logisticUnit);
+    const logisticUnitId = logisticUnit.logisticUnitId;
 
     if (!warehouseOrderId) {
       setError("Wybrane zlecenie nie posiada prawidłowego ID.");
@@ -439,9 +406,9 @@ export const WarehouseShipmentScreen = ({ onBack }) => {
               numberOfLines={2}
             >
               {selectedWarehouseOrder
-                ? `${getWarehouseOrderNumber(
-                    selectedWarehouseOrder,
-                  )} — ${getWarehouseOrderCustomerName(selectedWarehouseOrder)}`
+                ? `${selectedWarehouseOrder.orderNumber} — ${
+                    selectedWarehouseOrder.customerName ?? "Brak klienta"
+                  }`
                 : warehouseOrders.length === 0
                   ? "Brak aktywnych zleceń"
                   : "Wybierz zlecenie magazynowe"}
@@ -460,25 +427,19 @@ export const WarehouseShipmentScreen = ({ onBack }) => {
             <View style={styles.orderDetails}>
               <DetailRow
                 label="Numer zlecenia"
-                value={getWarehouseOrderNumber(selectedWarehouseOrder)}
+                value={selectedWarehouseOrder.orderNumber}
               />
 
-              <DetailRow
-                label="Status"
-                value={getWarehouseOrderStatus(selectedWarehouseOrder)}
-              />
+              <DetailRow label="Status" value={selectedWarehouseOrder.status} />
 
               <DetailRow
                 label="Klient"
-                value={getWarehouseOrderCustomerName(selectedWarehouseOrder)}
+                value={selectedWarehouseOrder.customerName}
               />
 
               <DetailRow
                 label="Data utworzenia"
-                value={
-                  selectedWarehouseOrder.createdAt ??
-                  selectedWarehouseOrder.CreatedAt
-                }
+                value={selectedWarehouseOrder.createdAt}
               />
             </View>
           ) : null}
@@ -531,7 +492,7 @@ export const WarehouseShipmentScreen = ({ onBack }) => {
           {logisticUnit ? (
             <View style={styles.logisticUnitCard}>
               <Text style={styles.logisticUnitTitle}>
-                ✓ Jednostka odnaleziona
+                Jednostka odnaleziona
               </Text>
 
               <DetailRow label="SSCC" value={logisticUnit.sscc} />
@@ -600,7 +561,7 @@ export const WarehouseShipmentScreen = ({ onBack }) => {
 
         {shipmentResult ? (
           <View style={styles.successCard}>
-            <Text style={styles.successTitle}>✓ Wydanie zakończone</Text>
+            <Text style={styles.successTitle}> Wydanie zakończone</Text>
 
             <DetailRow label="Zlecenie" value={shipmentResult.orderNumber} />
 
@@ -621,7 +582,7 @@ export const WarehouseShipmentScreen = ({ onBack }) => {
             <DetailRow label="Typ ruchu" value={shipmentResult.movementType} />
 
             <DetailRow
-              label="Utworzone ruchy"
+              label="Id wydania"
               value={shipmentResult.stockMovementIds?.join(", ") || "Brak"}
             />
 
@@ -642,15 +603,13 @@ export const WarehouseShipmentScreen = ({ onBack }) => {
         visible={isWarehouseOrderModalVisible}
         title="Wybierz zlecenie magazynowe"
         items={warehouseOrders}
-        keyExtractor={(warehouseOrder) => getWarehouseOrderId(warehouseOrder)}
-        getTitle={(warehouseOrder) => getWarehouseOrderNumber(warehouseOrder)}
-        getSubtitle={(warehouseOrder) => {
-          const customerName = getWarehouseOrderCustomerName(warehouseOrder);
-
-          const status = getWarehouseOrderStatus(warehouseOrder);
-
-          return `${customerName} • ${status}`;
-        }}
+        keyExtractor={(warehouseOrder) => warehouseOrder.warehouseOrderId}
+        getTitle={(warehouseOrder) => warehouseOrder.orderNumber}
+        getSubtitle={(warehouseOrder) =>
+          `${warehouseOrder.customerName ?? "Brak klienta"} • ${
+            warehouseOrder.status
+          }`
+        }
         onSelect={handleWarehouseOrderSelect}
         onClose={handleCloseWarehouseOrderModal}
       />

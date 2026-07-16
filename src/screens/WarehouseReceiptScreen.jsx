@@ -8,11 +8,13 @@ import {
   TextInput,
   View,
 } from "react-native";
+
 import { StatusBar } from "expo-status-bar";
 import {
   getProductionLotsRequest,
   getProductionOrdersRequest,
 } from "../api/productionApi";
+
 import { getPrintersRequest } from "../api/printersApi";
 import { getLabelTemplatesRequest } from "../api/labelTemplatesApi";
 import { createWarehouseReceiptRequest } from "../api/warehouseReceiptsApi";
@@ -175,9 +177,7 @@ export const WarehouseReceiptScreen = ({ onBack }) => {
 
     const foundLot = productionLots.find((lot) => {
       const lotNumber = String(lot.lotNumber).trim().toLowerCase();
-
       const lotId = String(lot.productionLotId);
-
       return lotNumber === normalizedValue || lotId === normalizedValue;
     });
 

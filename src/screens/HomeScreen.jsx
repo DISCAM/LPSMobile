@@ -18,7 +18,7 @@ export const HomeScreen = ({
       <View style={styles.header}>
         <Text style={styles.title}>Operacje magazynowe</Text>
 
-        <Text style={styles.userText}>{user?.userName || user?.email}</Text>
+        <Text style={styles.userText}>{user?.email}</Text>
       </View>
 
       <View style={styles.content}>

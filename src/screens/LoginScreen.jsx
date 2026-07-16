@@ -12,6 +12,8 @@ import {
 import { StatusBar } from "expo-status-bar";
 import { useAuth } from "../auth/useAuth";
 
+// deklarujemy komponent
+
 export const LoginScreen = () => {
   const { login } = useAuth();
 
@@ -23,7 +25,6 @@ export const LoginScreen = () => {
   const handleLogin = async () => {
     if (!email.trim() || !password) {
       setError("Podaj adres e-mail i hasło.");
-
       return;
     }
 
@@ -40,10 +41,7 @@ export const LoginScreen = () => {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.page}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-    >
+    <KeyboardAvoidingView style={styles.page}>
       <StatusBar style="light" />
 
       <View style={styles.header}>
