@@ -25,40 +25,6 @@ const normalizeEan = (value) => {
   return valueWithoutScannerPrefix.replace(/\D/g, "");
 };
 
-const getProductEan = (product) => {
-  return product?.ean ?? product?.EAN ?? "";
-};
-
-const getProductId = (product) => {
-  return product?.productId ?? product?.ProductId;
-};
-
-const getProductCode = (product) => {
-  return product?.productCode ?? product?.ProductCode ?? "Brak";
-};
-
-const getProductName = (product) => {
-  return product?.name ?? product?.Name ?? "Brak";
-};
-
-const getProductDescription = (product) => {
-  return product?.description ?? product?.Description ?? "Brak";
-};
-
-const getProductGtin = (product) => {
-  return product?.gtin ?? product?.GTIN ?? "Brak";
-};
-
-const getProductIsActive = (product) => {
-  const isActive = product?.isActive ?? product?.IsActive;
-
-  if (isActive === undefined || isActive === null) {
-    return "Brak informacji";
-  }
-
-  return isActive ? "Aktywny" : "Nieaktywny";
-};
-
 export const ProductLookupScreen = ({ onBack }) => {
   const { token } = useAuth();
 
@@ -128,7 +94,7 @@ export const ProductLookupScreen = ({ onBack }) => {
       const products = await getProductsRequest(token);
 
       const foundProduct = products.find(
-        (item) => normalizeEan(getProductEan(item)) === normalizedEan,
+        (item) => normalizeEan(item.ean) === normalizedEan,
       );
 
       if (!foundProduct) {
@@ -241,25 +207,28 @@ export const ProductLookupScreen = ({ onBack }) => {
 
         {product ? (
           <View style={styles.detailsCard}>
-            <Text style={styles.successTitle}>✓ Produkt odnaleziony</Text>
+            <Text style={styles.successTitle}>Produkt odnaleziony</Text>
 
             <Text style={styles.productName}>
-              {getProductCode(product)} — {getProductName(product)}
+              {product.productCode} — {product.name}
             </Text>
 
-            <DetailRow label="ID produktu" value={getProductId(product)} />
+            <DetailRow label="ID produktu" value={product.id} />
 
-            <DetailRow label="Kod produktu" value={getProductCode(product)} />
+            <DetailRow label="Kod produktu" value={product.productCode} />
 
-            <DetailRow label="Nazwa" value={getProductName(product)} />
+            <DetailRow label="Nazwa" value={product.name} />
 
-            <DetailRow label="EAN" value={getProductEan(product)} />
+            <DetailRow label="EAN" value={product.ean} />
 
-            <DetailRow label="GTIN" value={getProductGtin(product)} />
+            <DetailRow label="GTIN" value={product.gtin} />
 
-            <DetailRow label="Status" value={getProductIsActive(product)} />
+            <DetailRow
+              label="Status"
+              value={product.isActive ? "Aktywny" : "Nieaktywny"}
+            />
 
-            <DetailRow label="Opis" value={getProductDescription(product)} />
+            <DetailRow label="Opis" value={product.description} />
           </View>
         ) : null}
       </ScrollView>

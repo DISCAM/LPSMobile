@@ -27,18 +27,6 @@ const normalizeLotNumber = (value) => {
   return valueWithoutApplicationIdentifier.trim().toUpperCase();
 };
 
-const getProductionLotId = (productionLot) => {
-  return productionLot?.productionLotId ?? productionLot?.ProductionLotId;
-};
-
-const getProductionLotNumber = (productionLot) => {
-  return productionLot?.lotNumber ?? productionLot?.LotNumber ?? "";
-};
-
-const getValue = (object, camelCaseName, pascalCaseName) => {
-  return object?.[camelCaseName] ?? object?.[pascalCaseName];
-};
-
 export const ProductionLotLookupScreen = ({ onBack }) => {
   const { token } = useAuth();
 
@@ -112,10 +100,6 @@ export const ProductionLotLookupScreen = ({ onBack }) => {
   const handleSearch = (scannedValue = lotNumber, showEmptyError = true) => {
     const normalizedLotNumber = normalizeLotNumber(scannedValue);
 
-    console.log("RAW LOT:", JSON.stringify(scannedValue));
-
-    console.log("NORMALIZED LOT:", normalizedLotNumber);
-
     if (!normalizedLotNumber) {
       if (showEmptyError) {
         setError("Zeskanuj lub wpisz numer partii LOT.");
@@ -153,11 +137,9 @@ export const ProductionLotLookupScreen = ({ onBack }) => {
       setIsSearching(true);
 
       const foundProductionLot = productionLots.find((productionLot) => {
-        const lotFromApi = normalizeLotNumber(
-          getProductionLotNumber(productionLot),
-        );
+        const lotFromApi = normalizeLotNumber(productionLot.lotNumber);
 
-        const productionLotId = String(getProductionLotId(productionLot) ?? "");
+        const productionLotId = String(productionLot.productionLotId);
 
         return (
           lotFromApi === normalizedLotNumber ||
@@ -317,109 +299,67 @@ export const ProductionLotLookupScreen = ({ onBack }) => {
 
         {selectedProductionLot ? (
           <View style={styles.detailsCard}>
-            <Text style={styles.successTitle}>✓ Partia odnaleziona</Text>
+            <Text style={styles.successTitle}> Partia odnaleziona</Text>
 
             <Text style={styles.lotTitle}>
-              {getProductionLotNumber(selectedProductionLot)}
+              {selectedProductionLot.lotNumber}
             </Text>
 
             <DetailRow
               label="ID partii"
-              value={getProductionLotId(selectedProductionLot)}
+              value={selectedProductionLot.productionLotId}
             />
 
             <DetailRow
               label="Numer LOT"
-              value={getProductionLotNumber(selectedProductionLot)}
+              value={selectedProductionLot.lotNumber}
             />
 
             <DetailRow
               label="Zlecenie produkcyjne"
-              value={getValue(
-                selectedProductionLot,
-                "productionOrderNumber",
-                "ProductionOrderNumber",
-              )}
+              value={selectedProductionLot.productionOrderNumber}
             />
 
             <DetailRow
               label="ID zlecenia produkcyjnego"
-              value={getValue(
-                selectedProductionLot,
-                "productionOrderId",
-                "ProductionOrderId",
-              )}
+              value={selectedProductionLot.productionOrderId}
             />
 
             <DetailRow
               label="Kod produktu"
-              value={getValue(
-                selectedProductionLot,
-                "productCode",
-                "ProductCode",
-              )}
+              value={selectedProductionLot.productCode}
             />
 
             <DetailRow
               label="Nazwa produktu"
-              value={getValue(
-                selectedProductionLot,
-                "productName",
-                "ProductName",
-              )}
+              value={selectedProductionLot.productName}
             />
 
             <DetailRow
               label="Wyprodukowana ilość"
-              value={getValue(
-                selectedProductionLot,
-                "producedQuantity",
-                "ProducedQuantity",
-              )}
+              value={selectedProductionLot.producedQuantity}
             />
 
-            <DetailRow
-              label="Status"
-              value={getValue(selectedProductionLot, "status", "Status")}
-            />
+            <DetailRow label="Status" value={selectedProductionLot.status} />
 
             <DetailRow
               label="Data produkcji"
-              value={getValue(
-                selectedProductionLot,
-                "productionDate",
-                "ProductionDate",
-              )}
+              value={selectedProductionLot.productionDate}
             />
 
             <DetailRow
               label="Data ważności"
-              value={
-                getValue(
-                  selectedProductionLot,
-                  "expirationDate",
-                  "ExpirationDate",
-                ) || "Brak"
-              }
+              value={selectedProductionLot.expirationDate || "Brak"}
             />
 
             <DetailRow
               label="Linia produkcyjna"
-              value={
-                getValue(
-                  selectedProductionLot,
-                  "productionLine",
-                  "ProductionLine",
-                ) || "Brak"
-              }
+              value={selectedProductionLot.productionLine || "Brak"}
             />
 
             <DetailRow
               label="Zmiana"
-              value={
-                getValue(selectedProductionLot, "shiftCode", "ShiftCode") ||
-                "Brak"
-              }
+              value={selectedProductionLot.shiftCode || "Brak"}
             />
           </View>
         ) : null}

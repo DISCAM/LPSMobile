@@ -49,9 +49,6 @@ export const LogisticUnitLookupScreen = ({ onBack }) => {
   const handleSearch = async (scannedValue = sscc, showEmptyError = true) => {
     const normalizedSscc = normalizeSscc(scannedValue);
 
-    //console.log("RAW SCAN:", JSON.stringify(scannedValue));
-    //console.log("NORMALIZED SSCC:", normalizedSscc);
-
     if (!normalizedSscc) {
       if (showEmptyError) {
         setError("Podaj numer SSCC.");
@@ -359,8 +356,10 @@ const styles = StyleSheet.create({
   detailsCard: {
     marginTop: 20,
     padding: 20,
+    borderWidth: 1,
+    borderColor: "#86efac",
     borderRadius: 12,
-    backgroundColor: "#ffffff",
+    backgroundColor: "#f0fdf4",
   },
 
   detailsTitle: {
